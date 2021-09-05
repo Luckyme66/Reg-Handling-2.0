@@ -4,30 +4,30 @@ currentNode::currentNode() {
 
 }
 
-void currentNode::update(int adress, File* file) {
-	// adress - offset relative to start of hbin records of new node
+void currentNode::update(int address, File* file) {
+	// address - offset relative to start of hbin records of new node
 	// file - file object containing node
-	file->getChars(4096 + adress, 2, (char*)&current.signature);
-	file->readNums(4096 + adress + 2, 2, (char*)&current.flags);
-	file->readNums(4096 + adress + 4, 8, (char*)&current.lastWriteTimestamp);
-	file->readNums(4096 + adress + 12, 4, (char*)&current.acessBits);
-	file->readNums(4096 + adress + 16, 4, (char*)&current.parent);
+	file->getChars(4096 + address, 2, (char*)&current.signature);
+	file->readNums(4096 + address + 2, 2, (char*)&current.flags);
+	file->readNums(4096 + address + 4, 8, (char*)&current.lastWriteTimestamp);
+	file->readNums(4096 + address + 12, 4, (char*)&current.accessBits);
+	file->readNums(4096 + address + 16, 4, (char*)&current.parent);
 	
 	// Harvest subkeys
 	int numSubkeys;
-	file->readNums(4096 + adress + 20, 4, (char*)&numSubkeys);
+	file->readNums(4096 + address + 20, 4, (char*)&numSubkeys);
 
 	int subKeyLocation;
-	file->readNums(4096 + adress + 28, 4, (char*)&subKeyLocation);
+	file->readNums(4096 + address + 28, 4, (char*)&subKeyLocation);
 
 	subKeyHarvest(subKeyLocation, file);
 
 	// Harvest values
 	int numValues;
-	file->readNums(4096 + adress + 36, 4, (char*)&numValues);
+	file->readNums(4096 + address + 36, 4, (char*)&numValues);
 
 	int valueLocation;
-	file->readNums(4096 + adress + 40, 4, (char*)&valueLocation);
+	file->readNums(4096 + address + 40, 4, (char*)&valueLocation);
 
 	valueHarvest(valueLocation, numValues, file);
 }
