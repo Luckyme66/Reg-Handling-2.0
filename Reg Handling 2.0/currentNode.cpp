@@ -78,6 +78,7 @@ void currentNode::valueHarvest(int valueLocation, int numValues, File* file) {
 		int offset; // offset of key value structure
 		file->readNums(4096 + valueLocation + tempOffset, 4, (char*)&offset);
 
+		file->readNums(4096 + offset, 4, (char*)&offset);
 		tempOffset += 4;
 	}
 }
