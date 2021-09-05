@@ -14,7 +14,7 @@ public:
 		char signature[2]; // 2 bytes
 		short flags; // 2 bytes
 		int lastWriteTimestamp; // 8 bytes
-		short acessBits; // 4 bytes
+		short accessBits; // 4 bytes
 		int parent;
 		int subkeys[30]; // pointer to subkeys, CHECK MAX LENGTH, 30 INCORRECT
 		char values[30][60]; // array of values, CHECK MAX LENGTH, 60 AND 30 INCORRECT
@@ -22,7 +22,7 @@ public:
 
 	} current; // The data for the current node
 
-	void update(int adress, File *file); // Harvests the data for the current node
+	void update(int address, File *file); // Harvests the data for the current node
 
 private:
 	void subKeyHarvest(int subKeyLocation, File* file); // Specifically handles subkey harvesting
