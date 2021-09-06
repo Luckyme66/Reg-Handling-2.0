@@ -30,7 +30,7 @@ File::File(const char file[64]) {
 
 }
 
-void File::getChars(int offset, int length, char* ptr) {
+void File::getChars(unsigned int offset, int length, char* ptr) {
 	//offset - offset relative to file start
 	//length - number of characters to read
 	//ptr - pointer to location to store output
@@ -41,7 +41,7 @@ void File::getChars(int offset, int length, char* ptr) {
 	(fs).get(ptr, truLength); //Store 'truLength' characters from file to desired location, with an a null terminator as the last char
 }
 
-void File::readNums(int offset, int length, char* ptr) {
+void File::readNums(unsigned int offset, int length, char* ptr) {
 	//offset - offset relative to file start
 	//length - number of characters to read
 	//ptr - pointer to location to store output

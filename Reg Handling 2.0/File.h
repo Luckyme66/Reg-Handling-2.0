@@ -7,10 +7,10 @@ public:
 	File(const char file[64]); // Harvests header
 	~File();
 
-	void getChars(int offset, int length, char* ptr); // Read characters and terminate with null
-	void readNums(int offset, int length, char* ptr); // Read characters raw
+	void getChars(unsigned int offset, int length, char* ptr); // Read characters and terminate with null
+	void readNums(unsigned int offset, int length, char* ptr); // Read characters raw
 
-	int offset = 4096; // offset of hbin start
+	unsigned int offset = 4096; // offset of hbin start
 	std::ifstream fs; //file stream containing the hive
 	std::ifstream* point = &fs; //pointer to file stream data
 
