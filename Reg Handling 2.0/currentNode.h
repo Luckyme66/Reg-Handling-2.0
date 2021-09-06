@@ -6,7 +6,6 @@ class currentNode
 {
 public:
 	currentNode(); // Probably nothing?
-	~currentNode(); // Also likely unused (turn into a singleton?)
 
 	struct Value {
 		char signature[2]; // 2 bytes

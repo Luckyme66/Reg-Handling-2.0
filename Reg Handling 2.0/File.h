@@ -5,7 +5,6 @@ class File
 {
 public:
 	File(const char file[64]); // Harvests header
-	~File();
 
 	void getChars(unsigned int offset, int length, char* ptr); // Read characters and terminate with null
 	void readNums(unsigned int offset, int length, char* ptr); // Read characters raw
