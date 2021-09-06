@@ -39,41 +39,45 @@ void currentNode::update(unsigned int address, File* file) {
 }
 
 void currentNode::subKeyHarvest(unsigned int subKeyLocation, File* file) {
-	char sig[2]; // signature
-	file->getChars(4096 + subKeyLocation, 2, (char*)&sig);
+	short sig; // signature
+	file->readNums(4096 + subKeyLocation, 2, (char*)&sig);
 
 	int elms; // num elements in structure
-	file->readNums(4096 + subKeyLocation + 2, 2, (char*)elms);
+	file->readNums(4096 + subKeyLocation + 2, 2, (char*)&elms);
 
 	int tempOffset = 4; // Used to track offset relative to start of index, 4 bytes for signature and num elms
 
-	switch (int(sig)) {
+	switch (sig) {
 
-	case(int("li")):
+	case(0x6c69): // li
 		for (int i = 0; i < elms; i++) {
 			file->readNums(4096 + subKeyLocation + tempOffset, 4, (char*)&current.subkeys[i]);
 			tempOffset += 4;
 		}
+		break;
 
-	case(int("lf")):
+	case(0x6c66): // lf
 		for (int i = 0; i < elms; i++) {
 			file->readNums(4096 + subKeyLocation + tempOffset, 4, (char*)&current.subkeys[i]);
 			tempOffset += 8;
 		}
+		break;
 
-	case(int("lh")):
+	case(0x6c68): // lh
 		for (int i = 0; i < elms; i++) {
 			file->readNums(4096 + subKeyLocation + tempOffset, 4, (char*)&current.subkeys[i]);
 			tempOffset += 8;
 		}
+		break;
 
-	case(int("ri")):
+	case(0x7269): // ri
 		for (int i = 0; i < elms; i++) {
 			unsigned int tempLocation; // stores location of subkey list
 			file->readNums(4096 + subKeyLocation + tempOffset, 4, (char*)&tempLocation);
 			subKeyHarvest(tempLocation, file);
 			tempOffset += 4;
 		}
+		break;
 	}
 }
 
