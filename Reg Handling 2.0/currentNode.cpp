@@ -87,10 +87,46 @@ void currentNode::valueHarvest(unsigned int valueLocation, int numValues, File* 
 		file->readNums(4096 + offset, 2, (char*)&current.values[i].signature);
 		file->readNums(4096 + offset + 2, 2, (char*)&current.values[i].nameLength);
 		file->readNums(4096 + offset + 4, 4, (char*)&current.values[i].dataSize);
+		file->readNums(4096 + offset + 8, 4, (char*)&current.values[i].dataOffset);
+
 		if (current.values[i].dataSize & (1<<31)){ // Check if msb is 1
 			file->readNums(4096 + offset + 8, (current.values[i].dataSize &= ~(1UL<<31)), (char*)&current.values[i].value);
 		}
-		file->readNums(4096 + offset + 8, 4, (char*)&current.values[i].dataOffset);
+		else {
+			char sig[2];
+			file->getChars(4096 + current.values[i].dataOffset, 2, (char*)&sig);
+			if (sig == "db"){
+				int numSeg;
+				file->readNums(4096 + current.values[i].dataOffset + 2, 2, (char*)&numSeg);
+
+				unsigned int tempLocation;
+				file->readNums(4096 + current.values[i].dataOffset + 4, 4, (char*)&tempLocation);
+
+				int tempOffset2 = 0;
+				for (int x = 0; x < numSeg; x++) {
+					unsigned int dataLocation;
+					file->readNums(4096 + tempLocation + tempOffset2, 4, (char*)&dataLocation);
+
+					int size;
+					if (current.values[i].dataSize - (16344*x) > 16344){
+						size = 16344;
+					}
+					else {
+						size = current.values[i].dataSize - (16344 * x);
+					}
+
+					std::string temp; //string variables may not work for this purpose. Check during testing
+					file->readNums(4096 + dataLocation + 4, size, (char*)&temp);
+
+					current.values[i].value += temp;
+
+					tempOffset += 4;
+				}
+			}
+			else {
+				file->readNums(4096 + current.values[i].dataOffset, (current.values[i].dataSize &= ~(1UL << 31)), (char*)&current.values[i].value);
+			}
+		}
 		file->readNums(4096 + offset + 12, 4, (char*)&current.values[i].dataType);
 		file->readNums(4096 + offset + 16, 2, (char*)&current.values[i].flags);
 		file->getChars(4096 + offset + 20, current.values[i].nameLength, (char*)&current.values[i].name);

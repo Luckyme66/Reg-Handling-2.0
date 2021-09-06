@@ -16,7 +16,7 @@ public:
 		unsigned short dataType; // 4 bytes
 		unsigned short flags; // 2 bytes
 		char name[60]; // name of value, CHECK MAX LENGTH, 60 INCORRECT
-		char value[60]; // actual value, CHECK MAX LENGTH, 60 INCORRECT
+		std::string value; // actual value, string variables may not work for this purpose. Check during testing
 	};
 
 	struct Node { 
