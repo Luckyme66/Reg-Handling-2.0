@@ -1,5 +1,23 @@
 #include "File.h"
 
+void utf8_ut16(char* source, int sizeOfSource, char* dest) {
+	char* data = new char[sizeOfSource / 2];
+
+	for (int i = 0; i < sizeOfSource; i = i + 2) {
+		char val = *(source + i);
+		if (val == 0x00) {
+			data[i / 2] = val;
+			break;
+		}
+		else {
+			data[i / 2] = val;
+		}
+	}
+
+	strcpy_s(dest, 64, data);
+	delete[] data;
+}
+
 File::File(const char file[64]) {
 	fs.open(file); //Open file
 
@@ -23,11 +41,14 @@ File::File(const char file[64]) {
 	//Get file length
 	readNums(0x28, 4, (char*)&length);
 
-	//Get file name
-	getChars(0x30, 63, (char*)&fileName);
+	//Get file name and switch to different utf so printable
+	char temp[64];
+	getChars(0x30, 63, (char*)&temp);
+	utf8_ut16(temp, 64, fileName);
+}
 
-	fs.close(); //Close file
-
+File::~File() {
+	fs.close();
 }
 
 void File::getChars(unsigned int offset, int length, char* ptr) {
@@ -47,6 +68,6 @@ void File::readNums(unsigned int offset, int length, char* ptr) {
 	//ptr - pointer to location to store output
 	//function reads 'length' number of chars from 'offset' and writes it to location ptr
 
-	(point)->seekg(offset); //Move to correct place in file
-	(point)->read(ptr, length); //Store 'length' characters from file to desired location
+	(&fs)->seekg(offset); //Move to correct place in file
+	(&fs)->read(ptr, length); //Store 'length' characters from file to desired location
 }

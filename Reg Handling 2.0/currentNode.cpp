@@ -7,6 +7,9 @@ currentNode::currentNode() {
 void currentNode::update(unsigned int address, File* file) {
 	// address - offset relative to start of hbin records of new node
 	// file - file object containing node
+	
+	address += 4;
+
 	file->getChars(4096 + address, 2, (char*)&current.signature);
 	file->readNums(4096 + address + 2, 2, (char*)&current.flags);
 	file->readNums(4096 + address + 4, 8, (char*)&current.lastWriteTimestamp);

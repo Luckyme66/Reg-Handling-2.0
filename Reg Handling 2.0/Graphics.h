@@ -5,10 +5,13 @@
 class Graphics
 {
 public:
-	Graphics(File* filee, currentNode* managerr);
+	Graphics(const char file[64]);
+	~Graphics();
+
 	void up();
 	void down(int index);
-	void display();
+	void display(); // Displays current cell info
+	void displayFile(); // Displays some header info
 
 private:
 	File* file; // file opject to act on
