@@ -11,5 +11,8 @@ int main(){
 	Graphics screen("C:\\Users\\lucy\\Documents\\SANS Donald Blake\\config\\SAM");
 
 	screen.display();
+	screen.displayFile();
 
+	screen.down(0);
+	screen.display();
 }

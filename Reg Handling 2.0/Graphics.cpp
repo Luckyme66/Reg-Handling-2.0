@@ -22,7 +22,13 @@ void Graphics::down(int index) {
 }
 
 void Graphics::display() {
+	std::cout << "Size: " << manager->current.size << "\n";
 	std::cout << "Signature: " << manager->current.signature << "\n";
+	std::cout << "Flags: " << manager->current.flags << "\n";
+	std::cout << "Last Write Timestamp: " << manager->current.lastWriteTimestamp << "\n";
+	std::cout << "Access Bits: " << manager->current.accessBits << "\n";
+	std::cout << "Parent: " << manager->current.parent << "\n";
+	std::cout << "Name: " << manager->current.name << "\n";
 }
 
 void Graphics::displayFile() {

@@ -8,6 +8,8 @@ void currentNode::update(unsigned int address, File* file) {
 	// address - offset relative to start of hbin records of new node
 	// file - file object containing node
 	
+	file->readNums(4096 + address, 4, (char*)&current.size);
+
 	address += 4;
 
 	file->getChars(4096 + address, 2, (char*)&current.signature);
@@ -17,8 +19,7 @@ void currentNode::update(unsigned int address, File* file) {
 	file->readNums(4096 + address + 16, 4, (char*)&current.parent);
 
 	// Harvest subkeys
-	int numSubkeys;
-	file->readNums(4096 + address + 20, 4, (char*)&numSubkeys);
+	file->readNums(4096 + address + 20, 4, (char*)&current.numSubkeys);
 
 	unsigned int subKeyLocation;
 	file->readNums(4096 + address + 28, 4, (char*)&subKeyLocation);
@@ -35,45 +36,46 @@ void currentNode::update(unsigned int address, File* file) {
 	valueHarvest(valueLocation, numValues, file);
 
 	// Harvest name
-	short nameLength;
+	unsigned short nameLength = 0;
 	file->readNums(4096 + address + 72, 2, (char*)&nameLength);
 
-	file->readNums(4096 + address + 76, nameLength, (char*)&current.name);
+	file->getChars(4096 + address + 76, nameLength, (char*)&current.name);
 }
 
 void currentNode::subKeyHarvest(unsigned int subKeyLocation, File* file) {
+	subKeyLocation += 4;
 	short sig; // signature
 	file->readNums(4096 + subKeyLocation, 2, (char*)&sig);
 
-	int elms; // num elements in structure
+	unsigned short elms; // num elements in structure
 	file->readNums(4096 + subKeyLocation + 2, 2, (char*)&elms);
 
 	int tempOffset = 4; // Used to track offset relative to start of index, 4 bytes for signature and num elms
 
 	switch (sig) {
 
-	case(0x6c69): // li
+	case(0x696c): // li
 		for (int i = 0; i < elms; i++) {
 			file->readNums(4096 + subKeyLocation + tempOffset, 4, (char*)&current.subkeys[i]);
 			tempOffset += 4;
 		}
 		break;
 
-	case(0x6c66): // lf
+	case(0x666c): // lf
 		for (int i = 0; i < elms; i++) {
 			file->readNums(4096 + subKeyLocation + tempOffset, 4, (char*)&current.subkeys[i]);
 			tempOffset += 8;
 		}
 		break;
 
-	case(0x6c68): // lh
+	case(0x686c): // lh
 		for (int i = 0; i < elms; i++) {
 			file->readNums(4096 + subKeyLocation + tempOffset, 4, (char*)&current.subkeys[i]);
 			tempOffset += 8;
 		}
 		break;
 
-	case(0x7269): // ri
+	case(0x6972): // ri
 		for (int i = 0; i < elms; i++) {
 			unsigned int tempLocation; // stores location of subkey list
 			file->readNums(4096 + subKeyLocation + tempOffset, 4, (char*)&tempLocation);
@@ -100,7 +102,7 @@ void currentNode::valueHarvest(unsigned int valueLocation, int numValues, File* 
 			file->readNums(4096 + offset + 8, (current.values[i].dataSize &= ~(1UL<<31)), (char*)&current.values[i].value);
 		}
 		else {
-			char sig[2];
+			char sig[3];
 			file->getChars(4096 + current.values[i].dataOffset, 2, (char*)&sig);
 			if (sig == "db"){
 				int numSeg;

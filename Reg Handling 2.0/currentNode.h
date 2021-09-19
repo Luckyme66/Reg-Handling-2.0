@@ -8,7 +8,7 @@ public:
 	currentNode(); // Probably nothing?
 
 	struct Value {
-		char signature[2]; // 2 bytes
+		char signature[3]; // 2 bytes
 		unsigned short nameLength; // 2 bytes
 		unsigned short dataSize; // 4 bytes
 		unsigned short dataOffset; // 4 bytes
@@ -19,14 +19,16 @@ public:
 	};
 
 	struct Node { 
-		char signature[2]; // 2 bytes
+		int size;
+		char signature[3]; // 2 bytes
 		unsigned short flags; // 2 bytes
-		int lastWriteTimestamp; // 8 bytes
-		short accessBits; // 4 bytes
-		unsigned int parent;
+		unsigned long long lastWriteTimestamp; // 8 bytes
+		unsigned int accessBits; // 4 bytes
+		int parent;
 		unsigned int subkeys[30]; // pointer to subkeys, CHECK MAX LENGTH, 30 INCORRECT
 		Value values[30]; // array of values, CHECK MAX LENGTH, 30 INCORRECT
 		char name[60]; // name of node, CHECK MAX LENGTH, 60 INCORRECT
+		int numSubkeys; // number of subkeys
 
 	} current; // The data for the current node
 

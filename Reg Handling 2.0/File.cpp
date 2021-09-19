@@ -19,7 +19,7 @@ void utf8_ut16(char* source, int sizeOfSource, char* dest) {
 }
 
 File::File(const char file[64]) {
-	fs.open(file); //Open file
+	fs.open(file, std::ifstream::in | std::ifstream::binary); //Open file
 
 	//HARVEST HEADER
 

@@ -12,7 +12,7 @@ public:
 
 	unsigned int offset = 4096; // offset of hbin start
 
-	char signature[5]; //signature
+	char signature[64]; //signature
 	long long lastWriteTimestamp; //64-bit int of last write timestamp as a windows FILETIME
 	int majorVersionNumber; //32-bit int of major version number stored in little endian
 	int minorVersionNumber; //32-bit int of minor version number stored in little endian
