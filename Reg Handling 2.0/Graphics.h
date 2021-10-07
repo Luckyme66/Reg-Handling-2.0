@@ -8,13 +8,14 @@ public:
 	Graphics(const char file[64]);
 	~Graphics();
 
-	void up();
-	void down(int index);
+	void updateGlobalCurrent();
+
 	void display(); // Displays current cell info
 	void displayFile(); // Displays some header info
 
+	void start();
+
 private:
 	File* file; // file opject to act on
-	currentNode* manager; // current node object to act on
+	currentNode globalCurrent;
 };
-

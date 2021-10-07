@@ -10,9 +10,6 @@ int main(){
 	// File stores the file stream and methods for interacting with it, alongside file-wide metadata 
 	Graphics screen("C:\\Users\\lucy\\Documents\\SANS Donald Blake\\config\\SAM");
 
-	screen.display();
-	screen.displayFile();
+	screen.start();
 
-	screen.down(0);
-	screen.display();
 }
