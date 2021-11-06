@@ -52,6 +52,7 @@ File::File(const char file[64]) {
 void File::closeFile() {
 	fs.close();
 }
+
 File::~File() {
 	
 }
@@ -62,13 +63,11 @@ void File::up() {
 
 void File::down(int index) {
 	int val = cN.current.subkeys[index];
-
 	update(val);
 }
 
 currentNode::Node File::current() {
-	std::cout << "HI: " << cN.current.name << "\n";
-	currentNode::Node Test = cN.current;
+	currentNode::Node Test = cN.cuNode();
 	return (Test);
 }
 
@@ -96,13 +95,12 @@ void File::update(unsigned int address){
 	subKeyHarvest(subKeyLocation);
 
 	// Harvest values
-	int numValues;
-	readNums(4096 + address + 36, 4, (char*)&numValues);
+	readNums(4096 + address + 36, 4, (char*)&cN.current.numValues);
 
 	unsigned int valueLocation;
 	readNums(4096 + address + 40, 4, (char*)&valueLocation);
 
-	valueHarvest(valueLocation, numValues);
+	//valueHarvest(valueLocation, cN.current.numValues);
 
 	// Harvest name
 	readNums(4096 + address + 72, 2, (char*)&cN.current.nameLength);
@@ -165,10 +163,15 @@ void File::valueHarvest(unsigned int valueLocation, int numValues) {
 		getChars(4096 + offset, 2, (char*)&cN.current.values[i].signature);
 		readNums(4096 + offset + 2, 2, (char*)&cN.current.values[i].nameLength);
 		readNums(4096 + offset + 4, 4, (char*)&cN.current.values[i].dataSize);
+
+
+		cN.current.values[i].value.reserve(cN.current.values[i].dataSize);
+
 		readNums(4096 + offset + 8, 4, (char*)&cN.current.values[i].dataOffset);
 
-		if (cN.current.values[i].dataSize & (1 << 31)) { // Check if msb is 1
+		if (cN.current.values[i].dataSize & (1 << 31)) { // Check if msb is 1 // WARNING THIS DOES NOT WORK. PLS FIX. CAUSE OF ERROR.
 			readNums(4096 + offset + 8, (cN.current.values[i].dataSize &= ~(1UL << 31)), (char*)&cN.current.values[i].value);
+			std::cout << "yaha!\n";
 		}
 		else {
 			char sig[3];
@@ -193,10 +196,10 @@ void File::valueHarvest(unsigned int valueLocation, int numValues) {
 						size = cN.current.values[i].dataSize - (16344 * x);
 					}
 
-					std::string temp; //string variables may not work for this purpose. Check during testing
+					char *temp = new char[size];
 					readNums(4096 + dataLocation + 4, size, (char*)&temp);
-
-					cN.current.values[i].value += temp;
+					cN.current.values[i].value[cN.current.values[i].dataSize - (16344 * x)] = *temp;
+					delete temp;
 
 					tempOffset += 4;
 				}
@@ -205,6 +208,7 @@ void File::valueHarvest(unsigned int valueLocation, int numValues) {
 				readNums(4096 + cN.current.values[i].dataOffset + 4, (cN.current.values[i].dataSize &= ~(1UL << 31)), (char*)&cN.current.values[i].value);
 			}
 		}
+
 		readNums(4096 + offset + 12, 4, (char*)&cN.current.values[i].dataType);
 		readNums(4096 + offset + 16, 2, (char*)&cN.current.values[i].flags);
 		getChars(4096 + offset + 20, cN.current.values[i].nameLength, (char*)&cN.current.values[i].name);

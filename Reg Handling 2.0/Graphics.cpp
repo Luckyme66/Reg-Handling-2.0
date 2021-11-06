@@ -17,7 +17,11 @@ void Graphics::start() {
 	
 	file->down(0);
 	updateGlobalCurrent();
+	std::cout << "\n";
+	display();
 
+	file->down(0);
+	updateGlobalCurrent();
 	std::cout << "\n";
 	display();
 }
