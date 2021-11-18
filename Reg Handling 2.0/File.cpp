@@ -86,6 +86,11 @@ void File::update(unsigned int address){
 	readNums(4096 + address + 12, 4, (char*)&cN.current.accessBits);
 	readNums(4096 + address + 16, 4, (char*)&cN.current.parent);
 
+	// Harvest name
+	readNums(4096 + address + 72, 2, (char*)&cN.current.nameLength);
+
+	getChars(4096 + address + 76, cN.current.nameLength, (char*)&cN.current.name);
+
 	// Harvest subkeys
 	readNums(4096 + address + 20, 4, (char*)&cN.current.numSubkeys);
 
@@ -100,12 +105,7 @@ void File::update(unsigned int address){
 	unsigned int valueLocation;
 	readNums(4096 + address + 40, 4, (char*)&valueLocation);
 
-	//valueHarvest(valueLocation, cN.current.numValues);
-
-	// Harvest name
-	readNums(4096 + address + 72, 2, (char*)&cN.current.nameLength);
-
-	getChars(4096 + address + 76, cN.current.nameLength, (char*)&cN.current.name);
+	valueHarvest(valueLocation, cN.current.numValues);
 }
 
 void File::subKeyHarvest(unsigned int subKeyLocation) {
@@ -165,47 +165,46 @@ void File::valueHarvest(unsigned int valueLocation, int numValues) {
 		readNums(4096 + offset + 4, 4, (char*)&cN.current.values[i].dataSize);
 
 
-		cN.current.values[i].value.reserve(cN.current.values[i].dataSize);
+		//cN.current.values[i].value.reserve(cN.current.values[i].dataSize);
 
 		readNums(4096 + offset + 8, 4, (char*)&cN.current.values[i].dataOffset);
 
-		if (cN.current.values[i].dataSize & (1 << 31)) { // Check if msb is 1 // WARNING THIS DOES NOT WORK. PLS FIX. CAUSE OF ERROR.
-			readNums(4096 + offset + 8, (cN.current.values[i].dataSize &= ~(1UL << 31)), (char*)&cN.current.values[i].value);
-			std::cout << "yaha!\n";
+		if (cN.current.values[i].dataSize & (0b10000000000000000000000000000000)) { // Check if msb is 1
+			unsigned int newSize = cN.current.values[i].dataSize & 0b01111111111111111111111111111111;
+			memcpy(&cN.current.values[i].dataSize, &newSize, sizeof(unsigned int)); // set data size to correct size
+			bool True = true;
+			memcpy(&cN.current.values[i].storedLocally, &True, sizeof(bool)); // set storedLocally to true
+			unsigned int location = 4096 + offset + 8;
+			memcpy(&cN.current.values[i].pValue, &location, sizeof(unsigned int)); // set pointer to data location to be value offset field
 		}
+
 		else {
 			char sig[3];
 			getChars(4096 + cN.current.values[i].dataOffset + 4, 2, (char*)&sig);
 			if (sig == "db") {
+				bool True = true;
+				memcpy(&cN.current.values[i].bigData, &True, sizeof(bool));
+
 				int numSeg;
-				readNums(4096 + cN.current.values[i].dataOffset + 2, 2, (char*)&numSeg);
+				readNums(4096 + cN.current.values[i].dataOffset + 4 + 2, 2, (char*)&numSeg);
 
 				unsigned int tempLocation;
-				readNums(4096 + cN.current.values[i].dataOffset + 4, 4, (char*)&tempLocation);
+				readNums(4096 + cN.current.values[i].dataOffset + 4 + 4, 4, (char*)&tempLocation);
 
 				int tempOffset2 = 0;
 				for (int x = 0; x < numSeg; x++) {
 					unsigned int dataLocation;
 					readNums(4096 + tempLocation + tempOffset2, 4, (char*)&dataLocation);
 
-					int size;
-					if (cN.current.values[i].dataSize - (16344 * x) > 16344) {
-						size = 16344;
-					}
-					else {
-						size = cN.current.values[i].dataSize - (16344 * x);
-					}
-
-					char *temp = new char[size];
-					readNums(4096 + dataLocation + 4, size, (char*)&temp);
-					cN.current.values[i].value[cN.current.values[i].dataSize - (16344 * x)] = *temp;
-					delete temp;
+					unsigned int loc = 4096 + dataLocation;
+					memcpy(&cN.current.values[i].locations[x], &loc, sizeof(unsigned int));
 
 					tempOffset += 4;
 				}
 			}
 			else {
-				readNums(4096 + cN.current.values[i].dataOffset + 4, (cN.current.values[i].dataSize &= ~(1UL << 31)), (char*)&cN.current.values[i].value);
+				unsigned int loc = 4096 + cN.current.values[i].dataOffset;
+				memcpy(&cN.current.values[i].pValue, &loc, sizeof(unsigned int));
 			}
 		}
 
@@ -223,9 +222,15 @@ void File::getChars(unsigned int offset, int length, char* ptr) {
 	//ptr - pointer to location to store output
 	//function reads 'length' number of chars from 'offset' and writes it to location ptr
 
-	int truLength = length + 1; //Account for terminating character
-	(fs).seekg(offset); //Move to correct place in file
-	(fs).get(ptr, truLength); //Store 'truLength' characters from file to desired location, with an a null terminator as the last char
+	if (length == 0) {
+		std::string defaultt = "Default";
+		std::memcpy(ptr, defaultt.c_str(), defaultt.size());
+	}
+	else {
+		int truLength = length + 1; //Account for terminating character
+		(fs).seekg(offset); //Move to correct place in file
+		(fs).get(ptr, truLength); //Store 'truLength' characters from file to desired location, with an a null terminator as the last char
+	}
 }
 
 void File::readNums(unsigned int offset, int length, char* ptr) {

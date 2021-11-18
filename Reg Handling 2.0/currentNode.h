@@ -10,12 +10,15 @@ public:
 	struct Value {
 		char signature[3] = "00"; // 2 bytes
 		unsigned short nameLength = 00; // 2 bytes
-		unsigned short dataSize; // 4 bytes
+		unsigned int dataSize; // 4 bytes
 		unsigned short dataOffset = 0000; // 4 bytes
 		unsigned short dataType = 0000; // 4 bytes
 		unsigned short flags = 00; // 2 bytes
 		char name[60] = "00"; // name of value, CHECK MAX LENGTH, 60 INCORRECT
-		std::vector<char> value; // actual value, string variables may not work for this purpose. Check during testing
+		bool storedLocally = 0; // is the data stored locally in data offset. If true, pValue stores an offset to this data, NO 4-BYTE SIZE HEADER as not offset of cell
+		bool bigData = 0; // is the data stored over multiple locations, if true pValue is not used, instead locations is filled
+		unsigned int locations[100]; // list offsets in file to value segments, includes 4-byte size header present for every cell
+		unsigned int pValue = 0; // offset in file to value, includes 4-byte size header present for every cell
 	};
 
 	struct Node { 
@@ -36,4 +39,3 @@ public:
 
 	Node cuNode();
 };
-

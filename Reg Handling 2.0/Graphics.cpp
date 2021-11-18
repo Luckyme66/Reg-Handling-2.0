@@ -34,6 +34,9 @@ void Graphics::display() {
 	std::cout << "Access Bits: " << globalCurrent.current.accessBits << "\n";
 	std::cout << "Parent: " << globalCurrent.current.parent << "\n";
 	std::cout << "Name: " << globalCurrent.current.name << "\n";
+	if (globalCurrent.current.numValues > 0) {
+		//std::cout << "Value: " << globalCurrent.current.values[0].value << "\n";
+	}
 }
 
 void Graphics::displayFile() {
